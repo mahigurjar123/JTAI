@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Upload, Camera, Trash2, ArrowRight, ShieldCheck, HelpCircle } from "lucide-react";
 import { detectLandmarks } from "../utils/faceLandmarks";
-import { detectPoseLandmarks } from "../utils/poseLandmarks";
 import { validateDimensions, validateBrightnessAndContrast, validateFaceAlignment } from "../utils/photoValidation";
 import ValidationStatus from "./ValidationStatus";
 
@@ -108,19 +107,6 @@ export default function PhotoUpload({ onValidationComplete }) {
           landmarks: faceLandmarks,
           steps: { ...prev.steps, face: "success" }
         }));
-
-        // Step 3b: Run body-pose detection (shoulders/neck) — best effort, never blocks the gate.
-        // Close-up face shots may not include shoulders at all, which is fine; OverlayCanvas
-        // falls back to face-based estimation when pose landmarks are unavailable.
-        try {
-          const poseLandmarks = await detectPoseLandmarks(img);
-          setPhoto(prev => ({
-            ...prev,
-            poseLandmarks
-          }));
-        } catch (poseErr) {
-          console.warn("Pose detection unavailable, falling back to face-based placement.", poseErr);
-        }
 
         // Step 4: Validate symmetry
         const alignmentVal = validateFaceAlignment(faceLandmarks);

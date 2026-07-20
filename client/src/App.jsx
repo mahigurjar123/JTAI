@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import Navbar from "./components/Navbar";
 import PhotoUpload from "./components/PhotoUpload";
-import OverlayCanvas from "./components/OverlayCanvas";
 import AiTryOnPanel from "./components/AiTryOnPanel";
 import JewelrySelector from "./components/JewelrySelector";
 import AdminPanel from "./components/AdminPanel";
-import { RefreshCw, Layers, Sparkles } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import "./App.css";
 
 export default function App() {
@@ -14,7 +13,6 @@ export default function App() {
   const [selectedJewelry, setSelectedJewelry] = useState(null);
   const [selectedMode, setSelectedMode] = useState(null); // "manual" | "auto"
   const [wishlist, setWishlist] = useState([]); // Array of jewelry IDs
-  const [tryOnEngine, setTryOnEngine] = useState("ai"); // "canvas" | "ai"
 
   const toggleWishlist = (item) => {
     setWishlist((prev) =>
@@ -79,41 +77,12 @@ export default function App() {
                 {/* Split layout: Canvas Workbench + Selection Controls */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                  {/* Left Column: Composed Output Canvas and adjustments */}
+                  {/* Left Column: AI Generated Try-On */}
                   <div className="lg:col-span-7 space-y-4">
-                    {/* Try-On Engine Selector */}
-                    <div className="inline-flex border border-ink-700">
-                      <button
-                        onClick={() => setTryOnEngine("ai")}
-                        className={`flex items-center space-x-1.5 px-4 py-2 text-xs font-bold tracking-wide transition-colors duration-150 ${
-                          tryOnEngine === "ai" ? "bg-accent-500 text-ink-50" : "text-ink-400 hover:text-ink-50"
-                        }`}
-                      >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>AI Generate</span>
-                      </button>
-                      <button
-                        onClick={() => setTryOnEngine("canvas")}
-                        className={`flex items-center space-x-1.5 px-4 py-2 text-xs font-bold tracking-wide transition-colors duration-150 border-l border-ink-700 ${
-                          tryOnEngine === "canvas" ? "bg-accent-500 text-ink-50" : "text-ink-400 hover:text-ink-50"
-                        }`}
-                      >
-                        <Layers className="w-3.5 h-3.5" />
-                        <span>Live Preview</span>
-                      </button>
-                    </div>
-
-                    {tryOnEngine === "canvas" ? (
-                      <OverlayCanvas
-                        userPhotos={userPhotos}
-                        jewelry={selectedJewelry}
-                      />
-                    ) : (
-                      <AiTryOnPanel
-                        userPhotos={userPhotos}
-                        jewelry={selectedJewelry}
-                      />
-                    )}
+                    <AiTryOnPanel
+                      userPhotos={userPhotos}
+                      jewelry={selectedJewelry}
+                    />
                   </div>
 
                   {/* Right Column: Mode selection & Catalog search */}
