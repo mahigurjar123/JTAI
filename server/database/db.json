@@ -1,0 +1,78 @@
+{
+  "jewelry": [
+    {
+      "id": "neck_gold_kundan",
+      "name": "Imperial Kundan Bridal Necklace",
+      "category": "necklace",
+      "imageUrl": "/jewelry/neck_gold_kundan.svg",
+      "anchorPoint": {
+        "x": 0.5,
+        "y": 0.2
+      },
+      "tags": [
+        "bridal",
+        "heavy",
+        "gold",
+        "trending"
+      ],
+      "active": true,
+      "price": 5400,
+      "createdAt": "2026-07-18T07:47:11.146Z"
+    },
+    {
+      "id": "ear_emerald_drops",
+      "name": "Emerald Drop Earrings",
+      "category": "earrings",
+      "imageUrl": "/jewelry/ear_emerald_drops.svg",
+      "anchorPoint": {
+        "x": 0.5,
+        "y": 0.1
+      },
+      "tags": [
+        "minimal",
+        "emerald",
+        "oval-face",
+        "trending"
+      ],
+      "active": true,
+      "price": 1800,
+      "createdAt": "2026-07-18T07:47:11.148Z"
+    },
+    {
+      "id": "nose_minimal_ring",
+      "name": "Classic Gold Nath (Nose Ring)",
+      "category": "nose-ring",
+      "imageUrl": "/jewelry/nose_minimal_ring.svg",
+      "anchorPoint": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "tags": [
+        "traditional",
+        "minimal",
+        "gold"
+      ],
+      "active": true,
+      "price": 850,
+      "createdAt": "2026-07-18T07:47:11.148Z"
+    },
+    {
+      "id": "tikka_royal_pearl",
+      "name": "Royal Pearl Maang Tikka",
+      "category": "maang-tikka",
+      "imageUrl": "/jewelry/tikka_royal_pearl.svg",
+      "anchorPoint": {
+        "x": 0.5,
+        "y": 0.9
+      },
+      "tags": [
+        "royal",
+        "pearl",
+        "bridal"
+      ],
+      "active": true,
+      "price": 1200,
+      "createdAt": "2026-07-18T07:47:11.148Z"
+    }
+  ]
+}

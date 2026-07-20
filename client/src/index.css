@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --font-display: "Bricolage Grotesque", sans-serif;
+
+  /* Monochrome scale */
+  --color-ink-950: #0A0A0A;
+  --color-ink-900: #121212;
+  --color-ink-800: #1C1C1C;
+  --color-ink-700: #2A2A2A;
+  --color-ink-600: #3D3D3D;
+  --color-ink-500: #666666;
+  --color-ink-400: #8F8F8F;
+  --color-ink-300: #B8B8B8;
+  --color-ink-200: #DEDEDE;
+  --color-ink-100: #F0F0F0;
+  --color-ink-50:  #FAFAFA;
+
+  /* Sharp accent — crimson */
+  --color-accent-50:  #FFF1F1;
+  --color-accent-100: #FFDCDC;
+  --color-accent-300: #FF8A8A;
+  --color-accent-400: #F0453F;
+  --color-accent-500: #D31F1A; /* Base accent */
+  --color-accent-600: #B01512;
+  --color-accent-700: #870F0F;
+
+  /* Legacy aliases so existing gold-* / luxury-* class usages keep compiling
+     while components are migrated one-by-one to the ink/accent scale. */
+  --color-gold-50: #FAFAFA;
+  --color-gold-100: #F0F0F0;
+  --color-gold-200: #DEDEDE;
+  --color-gold-300: #B8B8B8;
+  --color-gold-400: #D31F1A;
+  --color-gold-500: #D31F1A;
+  --color-gold-600: #B01512;
+  --color-gold-700: #870F0F;
+  --color-gold-800: #1C1C1C;
+  --color-gold-900: #121212;
+
+  --color-luxury-bg: #0A0A0A;
+  --color-luxury-card: #121212;
+  --color-luxury-border: #2A2A2A;
+}
+
+body {
+  background-color: var(--color-ink-950) !important;
+  color: var(--color-ink-50) !important;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  width: 100vw;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border-inline: none;
+  min-height: 100vh;
+  display: block;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+/* Flat surfaces — no glassmorphism/blur, no gradients. Sharp edges, thin
+   1px borders, and the accent color doing all the visual work. */
+.surface {
+  background: var(--color-ink-900);
+  border: 1px solid var(--color-ink-700);
+}
+
+.surface-raised {
+  background: var(--color-ink-800);
+  border: 1px solid var(--color-ink-600);
+}
+
+/* Legacy class aliases kept flat/monochrome instead of gold-gradient/blur so
+   existing markup renders correctly during incremental migration. */
+.glass,
+.glass-gold {
+  background: var(--color-ink-900);
+  border: 1px solid var(--color-ink-700);
+}
+
+.luxury-gradient {
+  background: var(--color-ink-950);
+}
+
+.gold-gradient-bg {
+  background: var(--color-accent-500);
+}
+
+.gold-text {
+  color: var(--color-accent-500);
+}
+
+.luxury-glow {
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.luxury-glow:hover {
+  border-color: var(--color-ink-500) !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-ink-950);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-600);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-500);
+}
+
+/* Fade-in animation */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Slide-up animation */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Shimmer for loading states — monochrome, no gold tint */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, var(--color-ink-900) 25%, var(--color-ink-700) 50%, var(--color-ink-900) 75%);
+  background-size: 200% auto;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* Accent pulse — used sparingly for active/live states */
+@keyframes pulse-accent {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(211, 31, 26, 0); }
+  50%       { box-shadow: 0 0 0 4px rgba(211, 31, 26, 0.15); }
+}
+
+.animate-pulse-gold {
+  animation: pulse-accent 2s ease-in-out infinite;
+}
+
+/* Styled range inputs */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--color-ink-700);
+  border-radius: 0;
+  height: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-accent-500);
+  border: 2px solid var(--color-ink-950);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-accent-500);
+  border: 2px solid var(--color-ink-950);
+  cursor: pointer;
+}
