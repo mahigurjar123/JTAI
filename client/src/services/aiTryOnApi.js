@@ -6,18 +6,21 @@ import { TryOnResult } from "../models/TryOnResult";
 const API_BASE = "http://localhost:5000";
 
 /**
- * @param {{ userPhotoDataUrl: string, jewelryImageUrl: string, jewelryCategory: string, jewelryName?: string }} params
+ * @param {{ userPhotoDataUrl: string, faceRefPhotoDataUrl?: string|null, jewelryItems: Array<{ imageUrl: string, category: string, name?: string }> }} params
  * @returns {Promise<TryOnResult>}
  */
-export async function requestAiTryOn({ userPhotoDataUrl, jewelryImageUrl, jewelryCategory, jewelryName }) {
+export async function requestAiTryOn({ userPhotoDataUrl, faceRefPhotoDataUrl, jewelryItems }) {
   const res = await fetch(`${API_BASE}/api/ai/try-on/generate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       userPhoto: userPhotoDataUrl,
-      jewelryPhoto: jewelryImageUrl,
-      jewelryCategory,
-      jewelryName
+      faceRefPhoto: faceRefPhotoDataUrl || undefined,
+      jewelryItems: jewelryItems.map((item) => ({
+        jewelryPhoto: item.imageUrl,
+        jewelryCategory: item.category,
+        jewelryName: item.name
+      }))
     })
   });
 

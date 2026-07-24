@@ -10,7 +10,10 @@ import "./App.css";
 export default function App() {
   const [activeTab, setActiveTab] = useState("workbench");
   const [userPhotos, setUserPhotos] = useState(null); // { halfPhoto, fullPhoto }
-  const [selectedJewelry, setSelectedJewelry] = useState(null);
+  // Multiple pieces can be worn together (necklace + earrings + bangle...),
+  // but only one item per category — selecting a new necklace replaces the
+  // old one instead of stacking two necklaces.
+  const [selectedJewelryItems, setSelectedJewelryItems] = useState([]);
   const [selectedMode, setSelectedMode] = useState(null); // "manual" | "auto"
   const [wishlist, setWishlist] = useState([]); // Array of jewelry IDs
 
@@ -20,10 +23,20 @@ export default function App() {
     );
   };
 
+  const toggleJewelrySelection = (item) => {
+    setSelectedJewelryItems((prev) => {
+      const alreadySelected = prev.some((j) => j.id === item.id);
+      if (alreadySelected) {
+        return prev.filter((j) => j.id !== item.id);
+      }
+      return [...prev.filter((j) => j.category !== item.category), item];
+    });
+  };
+
   const handleResetPhotos = () => {
     if (window.confirm("Do you want to clear your current photos and upload new ones?")) {
       setUserPhotos(null);
-      setSelectedJewelry(null);
+      setSelectedJewelryItems([]);
       setSelectedMode(null);
     }
   };
@@ -81,7 +94,7 @@ export default function App() {
                   <div className="lg:col-span-7 space-y-4">
                     <AiTryOnPanel
                       userPhotos={userPhotos}
-                      jewelry={selectedJewelry}
+                      jewelryItems={selectedJewelryItems}
                     />
                   </div>
 
@@ -89,8 +102,8 @@ export default function App() {
                   <div className="lg:col-span-5 surface p-6 space-y-6">
                     <JewelrySelector
                       userPhotos={userPhotos}
-                      activeJewelry={selectedJewelry}
-                      onSelectJewelry={setSelectedJewelry}
+                      selectedItems={selectedJewelryItems}
+                      onToggleJewelry={toggleJewelrySelection}
                       selectedMode={selectedMode}
                       setSelectedMode={setSelectedMode}
                       wishlist={wishlist}

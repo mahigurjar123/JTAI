@@ -1,12 +1,13 @@
+
 import React, { useState, useEffect } from "react";
-import { Sparkles, Check, Grid, ArrowLeft, Heart, Tag } from "lucide-react";
+import { Sparkles, Check, Grid, ArrowLeft, Heart, Tag, X } from "lucide-react";
 const API_BASE = "http://localhost:5000";
 
-export default function JewelrySelector({ 
-  userPhotos, 
-  onSelectJewelry, 
-  activeJewelry, 
-  selectedMode, 
+export default function JewelrySelector({
+  userPhotos,
+  onToggleJewelry,
+  selectedItems = [],
+  selectedMode,
   setSelectedMode,
   wishlist = [],
   onToggleWishlist
@@ -92,7 +93,7 @@ export default function JewelrySelector({
       });
       
       if (chosenItem) {
-        onSelectJewelry(chosenItem);
+        onToggleJewelry(chosenItem);
       }
       
       setAiSelecting(false);
@@ -227,6 +228,34 @@ export default function JewelrySelector({
         <span>Change Mode</span>
       </button>
 
+      {/* Currently selected pieces — stack multiple categories, then submit
+          from the AI Try-On panel's Generate button. */}
+      {selectedItems.length > 0 && (
+        <div className="surface-raised p-3 space-y-2 animate-fade-in">
+          <p className="text-[10px] font-bold text-ink-400 uppercase tracking-wider">
+            Selected ({selectedItems.length}) — click Generate when ready
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {selectedItems.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center space-x-1.5 pl-1.5 pr-1 py-1 border border-accent-500 bg-accent-500/5"
+              >
+                <img src={item.imageUrl} alt={item.name} className="w-6 h-6 object-contain" />
+                <span className="text-[10px] text-ink-200 font-medium max-w-[90px] truncate">{item.name}</span>
+                <button
+                  onClick={() => onToggleJewelry(item)}
+                  title="Remove"
+                  className="p-0.5 text-ink-400 hover:text-accent-400"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {selectedMode === "auto" && aiReport && (
         <div className="surface-raised p-5 space-y-5 animate-fade-in">
           <div className="flex items-center space-x-3">
@@ -257,16 +286,16 @@ export default function JewelrySelector({
               {aiReport.recommendations.map((item) => (
                 <div
                   key={item.id}
-                  onClick={() => onSelectJewelry(item)}
+                  onClick={() => onToggleJewelry(item)}
                   className={`relative p-2 border flex flex-col items-center justify-center cursor-pointer transition-colors duration-150 ${
-                    activeJewelry?.id === item.id
+                    selectedItems.some((s) => s.id === item.id)
                       ? "border-accent-500 bg-accent-500/5"
                       : "border-ink-700 hover:border-ink-500 bg-ink-900"
                   }`}
                 >
                   <img src={item.imageUrl} alt={item.name} className="w-12 h-12 object-contain" />
                   <p className="text-[9px] text-center font-medium mt-1 truncate w-full text-ink-300">{item.name}</p>
-                  {activeJewelry?.id === item.id && (
+                  {selectedItems.some((s) => s.id === item.id) && (
                     <div className="absolute top-1 right-1 p-0.5 bg-accent-500">
                       <Check className="w-2.5 h-2.5 text-ink-50 stroke-[3px]" />
                     </div>
@@ -311,9 +340,9 @@ export default function JewelrySelector({
           {filteredJewelry.map((item) => (
             <div
               key={item.id}
-              onClick={() => onSelectJewelry(item)}
+              onClick={() => onToggleJewelry(item)}
               className={`relative group border p-4 flex flex-col items-center justify-between cursor-pointer transition-colors duration-150 bg-ink-900 ${
-                activeJewelry?.id === item.id
+                selectedItems.some((s) => s.id === item.id)
                   ? "border-accent-500 bg-accent-500/5"
                   : "border-ink-700 hover:border-ink-500"
               }`}
@@ -344,7 +373,7 @@ export default function JewelrySelector({
               </div>
 
               {/* Active selection tick */}
-              {activeJewelry?.id === item.id && (
+              {selectedItems.some((s) => s.id === item.id) && (
                 <div className="absolute top-2.5 right-2.5 p-1 bg-accent-500 text-ink-50">
                   <Check className="w-3 h-3 stroke-[3px]" />
                 </div>

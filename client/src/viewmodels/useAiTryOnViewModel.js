@@ -1,7 +1,9 @@
-// ViewModel: owns AI try-on generation state for BOTH uploaded photos (the
-// close-up "half" photo and the full-body photo) and exposes a single
-// `generate` action that runs both generations in parallel. The View only
-// reads `half`/`full` result state and renders it — it never talks to the
+// ViewModel: owns AI try-on generation state. Generates a SINGLE result
+// showing every selected jewelry piece worn together, always composited onto
+// the full-body photo — the close-up "half" photo is sent along only as a
+// face-identity reference so the model locks onto the person's real face,
+// but it is never itself the base image and never produces its own separate
+// output. The View only reads `state` and renders it — it never talks to the
 // service or builds requests itself.
 
 import { useState, useCallback } from "react";
@@ -19,65 +21,55 @@ async function toDataUrl(imageObjectUrl) {
   });
 }
 
-const initialSlotState = { isGenerating: false, result: null, error: null };
-
-async function generateForSlot({ userPhoto, jewelry }) {
-  const userPhotoDataUrl = await toDataUrl(userPhoto.preview);
-  return requestAiTryOn({
-    userPhotoDataUrl,
-    jewelryImageUrl: jewelry.imageUrl,
-    jewelryCategory: jewelry.category,
-    jewelryName: jewelry.name
-  });
-}
+const initialState = { isGenerating: false, result: null, error: null };
 
 export function useAiTryOnViewModel() {
-  const [half, setHalf] = useState(initialSlotState);
-  const [full, setFull] = useState(initialSlotState);
+  const [state, setState] = useState(initialState);
 
-  // Runs both photo generations independently and in parallel — a failure on
-  // one (e.g. Photo B not uploaded, or a transient API error) never blocks or
-  // clears the other's result.
-  const generate = useCallback(async ({ userPhotos, jewelry }) => {
-    if (!jewelry?.imageUrl) {
-      const msg = "Select a jewelry item to generate.";
-      setHalf((s) => ({ ...s, error: msg }));
-      setFull((s) => ({ ...s, error: msg }));
+  const generate = useCallback(async ({ userPhotos, jewelryItems }) => {
+    if (!jewelryItems || jewelryItems.length === 0) {
+      setState((s) => ({ ...s, error: "Select at least one jewelry item to generate." }));
       return;
     }
 
-    const halfPhoto = userPhotos?.halfPhoto;
     const fullPhoto = userPhotos?.fullPhoto;
+    const halfPhoto = userPhotos?.halfPhoto;
 
-    if (halfPhoto?.preview) {
-      setHalf({ isGenerating: true, result: null, error: null });
-      generateForSlot({ userPhoto: halfPhoto, jewelry })
-        .then((result) => setHalf({ isGenerating: false, result, error: null }))
-        .catch((err) => {
-          console.error("AI try-on generation failed (Photo A):", err);
-          setHalf({ isGenerating: false, result: null, error: err.message || "Generation failed." });
-        });
-    } else {
-      setHalf({ isGenerating: false, result: null, error: null });
+    if (!fullPhoto?.preview) {
+      setState({
+        isGenerating: false,
+        result: null,
+        error: "Upload the full-body photo (Photo B) — the try-on is generated on it."
+      });
+      return;
     }
 
-    if (fullPhoto?.preview) {
-      setFull({ isGenerating: true, result: null, error: null });
-      generateForSlot({ userPhoto: fullPhoto, jewelry })
-        .then((result) => setFull({ isGenerating: false, result, error: null }))
-        .catch((err) => {
-          console.error("AI try-on generation failed (Photo B):", err);
-          setFull({ isGenerating: false, result: null, error: err.message || "Generation failed." });
-        });
-    } else {
-      setFull({ isGenerating: false, result: null, error: null });
+    setState({ isGenerating: true, result: null, error: null });
+
+    try {
+      const userPhotoDataUrl = await toDataUrl(fullPhoto.preview);
+      const faceRefPhotoDataUrl = halfPhoto?.preview ? await toDataUrl(halfPhoto.preview) : null;
+
+      const result = await requestAiTryOn({
+        userPhotoDataUrl,
+        faceRefPhotoDataUrl,
+        jewelryItems: jewelryItems.map((j) => ({
+          imageUrl: j.imageUrl,
+          category: j.category,
+          name: j.name
+        }))
+      });
+
+      setState({ isGenerating: false, result, error: null });
+    } catch (err) {
+      console.error("AI try-on generation failed:", err);
+      setState({ isGenerating: false, result: null, error: err.message || "Generation failed." });
     }
   }, []);
 
   const reset = useCallback(() => {
-    setHalf(initialSlotState);
-    setFull(initialSlotState);
+    setState(initialState);
   }, []);
 
-  return { half, full, generate, reset };
+  return { state, generate, reset };
 }

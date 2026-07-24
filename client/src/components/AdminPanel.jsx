@@ -73,6 +73,16 @@ export default function AdminPanel() {
   const [submitting, setSubmitting]  = useState(false);
   const [message,    setMessage]     = useState({ text: "", type: "" });
 
+  // AI detection state — runs the moment an image is selected, auto-filling
+  // Name/Category so the admin never has to identify pieces by hand. When the
+  // photo shows a full set (multiple piece types together), `detectedPieces`
+  // holds one { category, name } per piece so the admin can pick which one is
+  // actually the product being catalogued — the AI's guess is only a starting
+  // point, since that choice is a judgment call the image alone can't answer.
+  const [detecting, setDetecting] = useState(false);
+  const [detectionNote, setDetectionNote] = useState("");
+  const [detectedPieces, setDetectedPieces] = useState([]);
+
   const previewCanvasRef = useRef(null);
   const fileInputRef     = useRef(null);
 
@@ -99,11 +109,62 @@ export default function AdminPanel() {
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
     setAnchor({ x: 0.5, y: 0.5 });
+    setDetectionNote("");
+    setDetectedPieces([]);
 
-    // Auto-fill Name / Category from the filename
+    // Instant fallback while the AI call is in flight, in case it fails or is slow.
     const { name: guessedName, category: guessedCategory } = parseFilename(file.name);
     if (guessedName && !name) setName(guessedName);
     if (guessedCategory) setCategory(guessedCategory);
+
+    detectJewelry(file);
+  };
+
+  // ── AI vision detection — looks at the image and identifies every distinct
+  // jewelry piece type present (a photo may show a full set: necklace +
+  // earrings + tikka together) plus a short product name for each. Runs
+  // automatically the moment an image is selected; overrides the instant
+  // filename-based guess above once it resolves. When more than one piece
+  // type is found, `detectedPieces` is populated so the UI can offer chips
+  // letting the admin pick which piece is the actual product — the AI's
+  // `suggestedPrimary` is only a starting point.
+  const detectJewelry = async (file) => {
+    setDetecting(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const res = await fetch(`${API_BASE}/api/jewelry/detect`, { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Detection failed.");
+      }
+
+      const pieces = data.pieces || [];
+      setDetectedPieces(pieces);
+      applyDetectedPiece(pieces, data.suggestedPrimary);
+
+      setDetectionNote(
+        pieces.length > 1
+          ? "AI found multiple pieces in this photo — pick the one you're cataloguing below."
+          : `AI identified this as: ${data.suggestedPrimary}.`
+      );
+    } catch (err) {
+      console.warn("AI jewelry detection unavailable, keeping filename-based guess:", err);
+      setDetectionNote("Couldn't auto-detect this image — please check Name/Category manually.");
+    } finally {
+      setDetecting(false);
+    }
+  };
+
+  // Applies one detected piece's category+name to the form fields. Used both
+  // right after detection (with the AI's suggested primary) and whenever the
+  // admin clicks a different category chip to override that suggestion.
+  const applyDetectedPiece = (pieces, category) => {
+    const match = pieces.find((p) => p.category === category) || pieces[0];
+    if (!match) return;
+    setCategory(match.category);
+    setName(match.name);
   };
 
   // ── Anchor click on canvas ──────────────────────────────────
@@ -318,6 +379,33 @@ export default function AdminPanel() {
                       <HelpCircle className="w-3.5 h-3.5" />
                       <span>Click on the preview to position the anchor point.</span>
                     </p>
+                    {detecting && (
+                      <p className="text-[10px] text-ink-400 flex items-center space-x-1.5">
+                        <Loader2 className="w-3 h-3 animate-spin text-accent-500" />
+                        <span>AI is identifying this jewelry...</span>
+                      </p>
+                    )}
+                    {!detecting && detectionNote && (
+                      <p className="text-[10px] text-ink-400">{detectionNote}</p>
+                    )}
+                    {!detecting && detectedPieces.length > 1 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {detectedPieces.map((piece) => (
+                          <button
+                            key={piece.category}
+                            type="button"
+                            onClick={() => applyDetectedPiece(detectedPieces, piece.category)}
+                            className={`px-2.5 py-1 text-[10px] font-semibold capitalize border transition-colors ${
+                              category === piece.category
+                                ? "bg-accent-500 border-accent-500 text-ink-50"
+                                : "bg-ink-900 border-ink-700 text-ink-400 hover:border-accent-500"
+                            }`}
+                          >
+                            {piece.category.replace("-", " ")}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <div className="border border-ink-700 bg-ink-950 overflow-hidden flex items-center justify-center p-3">
                       <canvas
                         ref={previewCanvasRef}
@@ -345,7 +433,7 @@ export default function AdminPanel() {
                     <input ref={fileInputRef} type="file" accept="image/png,image/svg+xml,image/webp" hidden onChange={handleImageChange} />
                     <UploadCloud className="w-6 h-6 text-ink-500 group-hover:text-accent-500 mb-2 transition-colors" />
                     <span className="font-medium text-ink-400 group-hover:text-ink-50 transition-colors">Click to upload PNG</span>
-                    <span className="text-[9px] text-ink-500 mt-1">Must have transparent background · Name &amp; Category auto-fill from filename</span>
+                    <span className="text-[9px] text-ink-500 mt-1">Must have transparent background · Name &amp; Category auto-detected by AI</span>
                   </div>
                 )}
               </div>

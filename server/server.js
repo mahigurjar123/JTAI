@@ -13,6 +13,7 @@ import { fileURLToPath } from "url";
 import multer     from "multer";
 import dotenv     from "dotenv";
 import tryOnRoutes from "./routes/tryOnRoutes.js";
+import { postDetectJewelry } from "./controllers/jewelryDetectionController.js";
 // import { adminDb, adminStorage } from "./firebase/firebaseAdmin.js";
 // import { FieldValue } from "firebase-admin/firestore";
 
@@ -26,6 +27,7 @@ const PORT = process.env.PORT || 5000;
 
 // ─── Local storage paths ───────────────────────────────────────────────────
 const JEWELRY_DIR = path.join(__dirname, "public", "jewelry");
+const BANNERS_DIR  = path.join(__dirname, "public", "banners");
 const DATA_DIR     = path.join(__dirname, "data");
 const JEWELRY_DB   = path.join(DATA_DIR, "jewelry.json");
 
@@ -41,6 +43,7 @@ app.use(cors());
 // Raised JSON limit: AI try-on requests carry two base64-encoded photos in the body.
 app.use(express.json({ limit: "25mb" }));
 app.use("/jewelry-images", express.static(JEWELRY_DIR));
+app.use("/banner-images", express.static(BANNERS_DIR));
 
 // ─── Multer: store jewelry images straight into public/jewelry ───────────────
 const storage = multer.diskStorage({
@@ -51,6 +54,11 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage, limits: { fileSize: 15 * 1024 * 1024 } });
+
+// In-memory multer for the AI-detection endpoint — that image is only ever
+// analyzed and discarded, never persisted, so writing it to disk first would
+// be pure waste.
+const uploadToMemory = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // JEWELRY API (local disk + JSON, permanent across restarts)
@@ -114,6 +122,9 @@ app.post("/api/jewelry", upload.single("jewelryImage"), (req, res) => {
     res.status(500).json({ error: "Failed to add jewelry.", detail: err.message });
   }
 });
+
+/** POST /api/jewelry/detect — AI vision detection of category/name from an image */
+app.post("/api/jewelry/detect", uploadToMemory.single("image"), postDetectJewelry);
 
 /** PUT /api/jewelry/:id — update metadata fields */
 app.put("/api/jewelry/:id", (req, res) => {

@@ -110,5 +110,485 @@
     "active": true,
     "createdAt": 1784553066982,
     "updatedAt": 1784553066982
+  },
+  {
+    "id": "j-1784626744571",
+    "name": "Pearl Drop Temple Necklace",
+    "category": "necklace",
+    "imageUrl": "/jewelry-images/j-1784626744571.png",
+    "filename": "j-1784626744571.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626744571,
+    "updatedAt": 1784626744571
+  },
+  {
+    "id": "j-1784626758924",
+    "name": "Polki Diamond Choker Necklace",
+    "category": "necklace",
+    "imageUrl": "/jewelry-images/j-1784626758924.png",
+    "filename": "j-1784626758924.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626758924,
+    "updatedAt": 1784626758924
+  },
+  {
+    "id": "j-1784626780146",
+    "name": "Antique Gold Long Necklace",
+    "category": "necklace",
+    "imageUrl": "/jewelry-images/j-1784626780146.png",
+    "filename": "j-1784626780146.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626780146,
+    "updatedAt": 1784626780146
+  },
+  {
+    "id": "j-1784626797952",
+    "name": "Pearl Jhumka Earrings",
+    "category": "earrings",
+    "imageUrl": "/jewelry-images/j-1784626797952.png",
+    "filename": "j-1784626797952.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.1
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626797952,
+    "updatedAt": 1784626797952
+  },
+  {
+    "id": "j-1784626821448",
+    "name": "Peacock Meenakari Earrings",
+    "category": "earrings",
+    "imageUrl": "/jewelry-images/j-1784626821448.png",
+    "filename": "j-1784626821448.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.1
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626821448,
+    "updatedAt": 1784626821448
+  },
+  {
+    "id": "j-1784626835729",
+    "name": "Antique Gold Drop Earrings",
+    "category": "earrings",
+    "imageUrl": "/jewelry-images/j-1784626835729.png",
+    "filename": "j-1784626835729.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.1
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626835729,
+    "updatedAt": 1784626835729
+  },
+  {
+    "id": "j-1784626854501",
+    "name": "Pearl Drop Nose Ring",
+    "category": "nose-ring",
+    "imageUrl": "/jewelry-images/j-1784626854501.png",
+    "filename": "j-1784626854501.png",
+    "anchorPoint": {
+      "x": 0.28,
+      "y": 0.57
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626854501,
+    "updatedAt": 1784626854501
+  },
+  {
+    "id": "j-1784626873807",
+    "name": "Meenakari Nose Ring",
+    "category": "nose-ring",
+    "imageUrl": "/jewelry-images/j-1784626873807.png",
+    "filename": "j-1784626873807.png",
+    "anchorPoint": {
+      "x": 0.28,
+      "y": 0.57
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626873807,
+    "updatedAt": 1784626873807
+  },
+  {
+    "id": "j-1784626886033",
+    "name": "Antique Gold Nath",
+    "category": "nose-ring",
+    "imageUrl": "/jewelry-images/j-1784626886033.png",
+    "filename": "j-1784626886033.png",
+    "anchorPoint": {
+      "x": 0.28,
+      "y": 0.57
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626886033,
+    "updatedAt": 1784626886033
+  },
+  {
+    "id": "j-1784626901945",
+    "name": "Ruby Kundan Maang Tikka",
+    "category": "maang-tikka",
+    "imageUrl": "/jewelry-images/j-1784626901945.png",
+    "filename": "j-1784626901945.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.05
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626901945,
+    "updatedAt": 1784626901945
+  },
+  {
+    "id": "j-1784626911456",
+    "name": "Pearl Chand Tikka",
+    "category": "maang-tikka",
+    "imageUrl": "/jewelry-images/j-1784626911456.png",
+    "filename": "j-1784626911456.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.05
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626911456,
+    "updatedAt": 1784626911456
+  },
+  {
+    "id": "j-1784626925571",
+    "name": "Polki Diamond Maang Tikka",
+    "category": "maang-tikka",
+    "imageUrl": "/jewelry-images/j-1784626925571.png",
+    "filename": "j-1784626925571.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.05
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626925571,
+    "updatedAt": 1784626925571
+  },
+  {
+    "id": "j-1784626936146",
+    "name": "Peacock Meenakari Tikka",
+    "category": "maang-tikka",
+    "imageUrl": "/jewelry-images/j-1784626936146.png",
+    "filename": "j-1784626936146.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.05
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626936146,
+    "updatedAt": 1784626936146
+  },
+  {
+    "id": "j-1784626957411",
+    "name": "Ruby Kundan Bangle Set",
+    "category": "bangle",
+    "imageUrl": "/jewelry-images/j-1784626957411.png",
+    "filename": "j-1784626957411.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784626957411,
+    "updatedAt": 1784626957411
+  },
+  {
+    "id": "j-1784627006843",
+    "name": "Ruby Kundan Cocktail Ring",
+    "category": "ring",
+    "imageUrl": "/jewelry-images/j-1784627006843.png",
+    "filename": "j-1784627006843.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784627006843,
+    "updatedAt": 1784627006843
+  },
+  {
+    "id": "j-1784627019098",
+    "name": "Pearl Adjustable Ring",
+    "category": "ring",
+    "imageUrl": "/jewelry-images/j-1784627019098.png",
+    "filename": "j-1784627019098.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784627019098,
+    "updatedAt": 1784627019098
+  },
+  {
+    "id": "j-1784627041286",
+    "name": "Meenakari Peacock Ring",
+    "category": "ring",
+    "imageUrl": "/jewelry-images/j-1784627041286.png",
+    "filename": "j-1784627041286.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784627041286,
+    "updatedAt": 1784627041286
+  },
+  {
+    "id": "j-1784628573952",
+    "name": "Ruby Kundan Bridal Necklace",
+    "category": "necklace",
+    "imageUrl": "/jewelry-images/j-1784628573952.png",
+    "filename": "j-1784628573952.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784628573952,
+    "updatedAt": 1784628573952
+  },
+  {
+    "id": "j-1784628588990",
+    "name": "Meenakari Peacock Necklace",
+    "category": "necklace",
+    "imageUrl": "/jewelry-images/j-1784628588990.png",
+    "filename": "j-1784628588990.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784628588990,
+    "updatedAt": 1784628588990
+  },
+  {
+    "id": "j-1784628605579",
+    "name": "Ruby Kundan Chandbali Earrings",
+    "category": "earrings",
+    "imageUrl": "/jewelry-images/j-1784628605579.png",
+    "filename": "j-1784628605579.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.1
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784628605579,
+    "updatedAt": 1784628605579
+  },
+  {
+    "id": "j-1784628620796",
+    "name": "Polki Diamond Stud Earrings",
+    "category": "earrings",
+    "imageUrl": "/jewelry-images/j-1784628620796.png",
+    "filename": "j-1784628620796.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.1
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784628620796,
+    "updatedAt": 1784628620796
+  },
+  {
+    "id": "j-1784628633330",
+    "name": "Ruby Kundan Nath",
+    "category": "nose-ring",
+    "imageUrl": "/jewelry-images/j-1784628633330.png",
+    "filename": "j-1784628633330.png",
+    "anchorPoint": {
+      "x": 0.28,
+      "y": 0.57
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784628633330,
+    "updatedAt": 1784628633330
+  },
+  {
+    "id": "j-1784628648175",
+    "name": "Polki Diamond Nath",
+    "category": "nose-ring",
+    "imageUrl": "/jewelry-images/j-1784628648175.png",
+    "filename": "j-1784628648175.png",
+    "anchorPoint": {
+      "x": 0.28,
+      "y": 0.57
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784628648175,
+    "updatedAt": 1784628648175
+  },
+  {
+    "id": "j-1784628659881",
+    "name": "Antique Gold Tikka",
+    "category": "maang-tikka",
+    "imageUrl": "/jewelry-images/j-1784628659881.png",
+    "filename": "j-1784628659881.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.05
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784628659881,
+    "updatedAt": 1784628659881
+  },
+  {
+    "id": "j-1784628671417",
+    "name": "Pearl Studded Bangle",
+    "category": "bangle",
+    "imageUrl": "/jewelry-images/j-1784628671417.png",
+    "filename": "j-1784628671417.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784628671417,
+    "updatedAt": 1784628671417
+  },
+  {
+    "id": "j-1784628682080",
+    "name": "Polki Diamond Bangle Set",
+    "category": "bangle",
+    "imageUrl": "/jewelry-images/j-1784628682080.png",
+    "filename": "j-1784628682080.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784628682080,
+    "updatedAt": 1784628682080
+  },
+  {
+    "id": "j-1784628695935",
+    "name": "Meenakari Bangle",
+    "category": "bangle",
+    "imageUrl": "/jewelry-images/j-1784628695935.png",
+    "filename": "j-1784628695935.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784628695935,
+    "updatedAt": 1784628695935
+  },
+  {
+    "id": "j-1784628709321",
+    "name": "Antique Gold Kada",
+    "category": "bangle",
+    "imageUrl": "/jewelry-images/j-1784628709321.png",
+    "filename": "j-1784628709321.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784628709321,
+    "updatedAt": 1784628709321
+  },
+  {
+    "id": "j-1784628724020",
+    "name": "Polki Diamond Ring",
+    "category": "ring",
+    "imageUrl": "/jewelry-images/j-1784628724020.png",
+    "filename": "j-1784628724020.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784628724020,
+    "updatedAt": 1784628724020
+  },
+  {
+    "id": "j-1784628736352",
+    "name": "Antique Gold Vanki Ring",
+    "category": "ring",
+    "imageUrl": "/jewelry-images/j-1784628736352.png",
+    "filename": "j-1784628736352.png",
+    "anchorPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "tags": [],
+    "price": null,
+    "active": true,
+    "createdAt": 1784628736352,
+    "updatedAt": 1784628736352
   }
 ]

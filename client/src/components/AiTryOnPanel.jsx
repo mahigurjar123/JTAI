@@ -1,95 +1,35 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Sparkles, Download, RefreshCw, AlertTriangle } from "lucide-react";
 import { useAiTryOnViewModel } from "../viewmodels/useAiTryOnViewModel";
 import { useDownloadGateViewModel } from "../viewmodels/useDownloadGateViewModel";
 import LeadCaptureModal from "./LeadCaptureModal";
 
-function ResultSlot({ label, uploaded, slot, onDownload }) {
-  const { isGenerating, result, error } = slot;
-
-  return (
-    <div className="space-y-3">
-      <h5 className="text-[10px] font-bold tracking-widest uppercase text-ink-400">{label}</h5>
-
-      <div className="relative bg-ink-950 border border-ink-700 min-h-[320px] flex items-center justify-center">
-        {result?.imageUrl && (
-          <img
-            src={result.imageUrl}
-            alt={`AI-generated jewelry try-on — ${label}`}
-            className="max-h-[420px] w-full object-contain"
-          />
-        )}
-
-        {!uploaded && !isGenerating && (
-          <p className="text-xs text-ink-500 px-6 text-center">This photo wasn't uploaded.</p>
-        )}
-
-        {uploaded && !result && !isGenerating && !error && (
-          <p className="text-xs text-ink-500 px-6 text-center">Waiting to generate…</p>
-        )}
-
-        {isGenerating && (
-          <div className="flex flex-col items-center space-y-3 text-ink-400">
-            <div className="w-9 h-9 border-2 border-accent-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs text-center px-4">Generating… this can take up to a minute.</span>
-          </div>
-        )}
-      </div>
-
-      {error && (
-        <div className="p-3 border border-accent-500/30 bg-accent-500/5 text-xs text-accent-400 flex items-start space-x-2">
-          <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {result?.imageUrl && (
-        <button
-          onClick={() => onDownload(result, label)}
-          className="w-full flex items-center justify-center space-x-2 p-2.5 bg-ink-50 hover:bg-accent-500 hover:text-ink-50 text-ink-950 font-bold cursor-pointer transition-colors border border-ink-50 hover:border-accent-500 text-xs"
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span>Download</span>
-        </button>
-      )}
-    </div>
-  );
-}
-
 // View: pure presentation. All generation state and logic lives in the
 // ViewModel — this component only reads it and dispatches user actions.
-// Both uploaded photos (close-up + full-body) are generated in parallel and
-// shown side by side, so the user sees the try-on result for each.
-export default function AiTryOnPanel({ userPhotos, jewelry }) {
-  const { half, full, generate, reset } = useAiTryOnViewModel();
+// Generates a single result, composited on the full-body photo, wearing
+// every currently-selected jewelry piece together; the close-up photo (if
+// uploaded) is only used behind the scenes as a face-identity reference and
+// never shown as its own separate output.
+//
+// Generation is explicit (Generate button) rather than auto-firing on every
+// selection change — the user picks as many pieces (one per category) as
+// they want stacked together first, then submits once.
+export default function AiTryOnPanel({ userPhotos, jewelryItems = [] }) {
+  const { state, generate, reset } = useAiTryOnViewModel();
   const downloadGate = useDownloadGateViewModel();
+  const { isGenerating, result, error } = state;
 
-  const hasAnyPhoto = !!userPhotos?.halfPhoto?.preview || !!userPhotos?.fullPhoto?.preview;
-  const canGenerate = hasAnyPhoto && !!jewelry?.imageUrl;
-  const isGenerating = half.isGenerating || full.isGenerating;
-  const hasAnyResult = !!half.result || !!full.result;
+  const hasFullPhoto = !!userPhotos?.fullPhoto?.preview;
+  const canGenerate = hasFullPhoto && jewelryItems.length > 0;
 
   const handleGenerate = () => {
-    generate({ userPhotos, jewelry });
+    generate({ userPhotos, jewelryItems });
   };
 
-  // Auto-generate the moment a new jewelry item is selected — the user should
-  // never have to press a button after picking a product. Guarded by jewelry.id
-  // (not the whole object) so re-renders with the same selection don't re-fire.
-  const lastGeneratedForRef = useRef(null);
-  useEffect(() => {
-    if (!jewelry?.id || !hasAnyPhoto) return;
-    if (lastGeneratedForRef.current === jewelry.id) return;
-
-    lastGeneratedForRef.current = jewelry.id;
-    generate({ userPhotos, jewelry });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jewelry?.id, hasAnyPhoto]);
-
-  const handleDownload = (result, label) => {
+  const handleDownload = () => {
     downloadGate.requestDownload(() => {
       const link = document.createElement("a");
-      link.download = `jtai-ai-${jewelry?.id || "tryon"}-${label.replace(/\s+/g, "-").toLowerCase()}.png`;
+      link.download = `jtai-ai-tryon-${Date.now()}.png`;
       link.href = result.imageUrl;
       link.target = "_blank";
       link.rel = "noreferrer";
@@ -106,7 +46,7 @@ export default function AiTryOnPanel({ userPhotos, jewelry }) {
           <Sparkles className="w-4 h-4 text-accent-500" />
           <span>AI Generated Try-On</span>
         </h4>
-        {hasAnyResult && (
+        {result && (
           <button
             onClick={reset}
             className="text-[10px] font-bold text-ink-400 hover:text-accent-400 flex items-center space-x-1 border border-ink-700 hover:border-accent-500 px-2.5 py-1 transition-colors"
@@ -117,27 +57,58 @@ export default function AiTryOnPanel({ userPhotos, jewelry }) {
         )}
       </div>
 
-      {!canGenerate && !isGenerating && !hasAnyResult && (
+      {!canGenerate && !isGenerating && !result && (
         <p className="text-xs text-ink-500 text-center py-8">
-          Upload a photo and select a jewelry item to generate an AI try-on.
+          Upload the full-body photo and select one or more jewelry pieces, then hit Generate.
         </p>
       )}
 
-      {(canGenerate || hasAnyResult) && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <ResultSlot
-            label="Photo A — Close-Up"
-            uploaded={!!userPhotos?.halfPhoto?.preview}
-            slot={half}
-            onDownload={handleDownload}
-          />
-          <ResultSlot
-            label="Photo B — Full Body"
-            uploaded={!!userPhotos?.fullPhoto?.preview}
-            slot={full}
-            onDownload={handleDownload}
-          />
+      {jewelryItems.length > 0 && !isGenerating && (
+        <p className="text-[10px] text-ink-400 text-center -mb-1">
+          {jewelryItems.length === 1
+            ? `Wearing: ${jewelryItems[0].name}`
+            : `Wearing ${jewelryItems.length} pieces: ${jewelryItems.map((j) => j.name).join(", ")}`}
+        </p>
+      )}
+
+      {(canGenerate || result || isGenerating) && (
+        <div className="relative bg-ink-950 border border-ink-700 min-h-[380px] flex items-center justify-center">
+          {result?.imageUrl && (
+            <img
+              src={result.imageUrl}
+              alt="AI-generated jewelry try-on"
+              className="max-h-[520px] w-full object-contain"
+            />
+          )}
+
+          {!result && !isGenerating && !error && (
+            <p className="text-xs text-ink-500 px-6 text-center">Waiting to generate…</p>
+          )}
+
+          {isGenerating && (
+            <div className="flex flex-col items-center space-y-3 text-ink-400">
+              <div className="w-9 h-9 border-2 border-accent-500 border-t-transparent rounded-full animate-spin" />
+              <span className="text-xs text-center px-4">Generating… this can take up to a minute.</span>
+            </div>
+          )}
         </div>
+      )}
+
+      {error && (
+        <div className="p-3 border border-accent-500/30 bg-accent-500/5 text-xs text-accent-400 flex items-start space-x-2">
+          <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {result?.imageUrl && (
+        <button
+          onClick={handleDownload}
+          className="w-full flex items-center justify-center space-x-2 p-2.5 bg-ink-50 hover:bg-accent-500 hover:text-ink-50 text-ink-950 font-bold cursor-pointer transition-colors border border-ink-50 hover:border-accent-500 text-xs"
+        >
+          <Download className="w-3.5 h-3.5" />
+          <span>Download</span>
+        </button>
       )}
 
       <button
@@ -150,7 +121,7 @@ export default function AiTryOnPanel({ userPhotos, jewelry }) {
         }`}
       >
         <Sparkles className="w-4 h-4" />
-        <span>{isGenerating ? "Generating…" : hasAnyResult ? "Regenerate Both" : "Generate AI Try-On"}</span>
+        <span>{isGenerating ? "Generating…" : result ? "Regenerate" : "Generate AI Try-On"}</span>
       </button>
 
       <LeadCaptureModal
