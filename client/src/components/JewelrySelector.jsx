@@ -7,6 +7,7 @@ export default function JewelrySelector({
   userPhotos,
   onToggleJewelry,
   selectedItems = [],
+  onClearAll,
   selectedMode,
   setSelectedMode,
   wishlist = [],
@@ -232,9 +233,19 @@ export default function JewelrySelector({
           from the AI Try-On panel's Generate button. */}
       {selectedItems.length > 0 && (
         <div className="surface-raised p-3 space-y-2 animate-fade-in">
-          <p className="text-[10px] font-bold text-ink-400 uppercase tracking-wider">
-            Selected ({selectedItems.length}) — click Generate when ready
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-bold text-ink-400 uppercase tracking-wider">
+              Selected ({selectedItems.length}) — click Generate when ready
+            </p>
+            {onClearAll && (
+              <button
+                onClick={onClearAll}
+                className="text-[10px] font-bold text-ink-400 hover:text-accent-400 transition-colors"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2">
             {selectedItems.map((item) => (
               <div

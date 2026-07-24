@@ -16,6 +16,12 @@ export default function App() {
   const [selectedJewelryItems, setSelectedJewelryItems] = useState([]);
   const [selectedMode, setSelectedMode] = useState(null); // "manual" | "auto"
   const [wishlist, setWishlist] = useState([]); // Array of jewelry IDs
+  // Tracks whether the current selection has already been generated once —
+  // once true, the NEXT jewelry click starts a fresh selection instead of
+  // stacking onto pieces from the already-generated result. Without this,
+  // picking a new piece after generating left the old generation's pieces
+  // silently selected too, so the next generate mixed old and new jewelry.
+  const [hasGeneratedOnce, setHasGeneratedOnce] = useState(false);
 
   const toggleWishlist = (item) => {
     setWishlist((prev) =>
@@ -25,12 +31,14 @@ export default function App() {
 
   const toggleJewelrySelection = (item) => {
     setSelectedJewelryItems((prev) => {
-      const alreadySelected = prev.some((j) => j.id === item.id);
+      const base = hasGeneratedOnce ? [] : prev;
+      const alreadySelected = base.some((j) => j.id === item.id);
       if (alreadySelected) {
-        return prev.filter((j) => j.id !== item.id);
+        return base.filter((j) => j.id !== item.id);
       }
-      return [...prev.filter((j) => j.category !== item.category), item];
+      return [...base.filter((j) => j.category !== item.category), item];
     });
+    setHasGeneratedOnce(false);
   };
 
   const handleResetPhotos = () => {
@@ -38,6 +46,7 @@ export default function App() {
       setUserPhotos(null);
       setSelectedJewelryItems([]);
       setSelectedMode(null);
+      setHasGeneratedOnce(false);
     }
   };
 
@@ -95,6 +104,7 @@ export default function App() {
                     <AiTryOnPanel
                       userPhotos={userPhotos}
                       jewelryItems={selectedJewelryItems}
+                      onGenerated={() => setHasGeneratedOnce(true)}
                     />
                   </div>
 
@@ -104,6 +114,7 @@ export default function App() {
                       userPhotos={userPhotos}
                       selectedItems={selectedJewelryItems}
                       onToggleJewelry={toggleJewelrySelection}
+                      onClearAll={() => { setSelectedJewelryItems([]); setHasGeneratedOnce(false); }}
                       selectedMode={selectedMode}
                       setSelectedMode={setSelectedMode}
                       wishlist={wishlist}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   Plus, Trash2, ToggleLeft, ToggleRight, HelpCircle,
-  Loader2, CheckCircle2, XCircle, UploadCloud, ExternalLink
+  Loader2, CheckCircle2, XCircle, UploadCloud, ExternalLink, Check
 } from "lucide-react";
 // NOTE: Firebase Firestore/Storage are not enabled on the project yet.
 // Jewelry is persisted via the local Express API (server/server.js), which
@@ -76,12 +76,17 @@ export default function AdminPanel() {
   // AI detection state — runs the moment an image is selected, auto-filling
   // Name/Category so the admin never has to identify pieces by hand. When the
   // photo shows a full set (multiple piece types together), `detectedPieces`
-  // holds one { category, name } per piece so the admin can pick which one is
-  // actually the product being catalogued — the AI's guess is only a starting
-  // point, since that choice is a judgment call the image alone can't answer.
+  // holds one { category, name } per piece. The admin can either pick a single
+  // piece to catalogue (via the form above) or, when there's more than one,
+  // edit each piece's name in `pieceSelections` and submit all of them at once
+  // — same source image, one catalog entry per included piece — instead of
+  // re-uploading the same photo N times.
   const [detecting, setDetecting] = useState(false);
   const [detectionNote, setDetectionNote] = useState("");
   const [detectedPieces, setDetectedPieces] = useState([]);
+  const [pieceSelections, setPieceSelections] = useState([]); // [{ category, name, included }]
+  const [submittingAll, setSubmittingAll] = useState(false);
+  const [submitAllProgress, setSubmitAllProgress] = useState({ done: 0, total: 0 });
 
   const previewCanvasRef = useRef(null);
   const fileInputRef     = useRef(null);
@@ -111,6 +116,7 @@ export default function AdminPanel() {
     setAnchor({ x: 0.5, y: 0.5 });
     setDetectionNote("");
     setDetectedPieces([]);
+    setPieceSelections([]);
 
     // Instant fallback while the AI call is in flight, in case it fails or is slow.
     const { name: guessedName, category: guessedCategory } = parseFilename(file.name);
@@ -142,11 +148,12 @@ export default function AdminPanel() {
 
       const pieces = data.pieces || [];
       setDetectedPieces(pieces);
+      setPieceSelections(pieces.map((p) => ({ category: p.category, name: p.name, included: true })));
       applyDetectedPiece(pieces, data.suggestedPrimary);
 
       setDetectionNote(
         pieces.length > 1
-          ? "AI found multiple pieces in this photo — pick the one you're cataloguing below."
+          ? "AI found multiple pieces in this photo — edit the names below and submit them all at once, or pick just one above."
           : `AI identified this as: ${data.suggestedPrimary}.`
       );
     } catch (err) {
@@ -218,7 +225,34 @@ export default function AdminPanel() {
     };
   }, [imagePreview, anchor]);
 
-  // ── Submit ─────────────────────────────────────────────────
+  // Posts one catalog entry for the given name/category, reusing the same
+  // uploaded image file, tags, price, active flag, and anchor point. Shared
+  // by the single-item submit and the "submit all detected pieces" flow below
+  // — both create a catalog entry the exact same way, just for different
+  // name/category pairs off the same source photo.
+  const uploadOneItem = async (itemName, itemCategory) => {
+    const formData = new FormData();
+    formData.append("jewelryImage", imageFile);
+    formData.append("name", itemName);
+    formData.append("category", itemCategory);
+    formData.append("tags", tags);
+    formData.append("price", price);
+    formData.append("active", active);
+    formData.append("anchorPoint", JSON.stringify(anchor));
+
+    const res = await fetch(`${API_BASE}/api/jewelry`, { method: "POST", body: formData });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Upload failed");
+    return data;
+  };
+
+  const resetForm = () => {
+    setName(""); setPrice(""); setTags(""); setActive(true);
+    setImageFile(null); setImagePreview(null); setAnchor({ x: 0.5, y: 0.5 });
+    setDetectedPieces([]); setPieceSelections([]); setDetectionNote("");
+  };
+
+  // ── Submit (single item — whatever's currently in the form) ────
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!imageFile) {
@@ -231,24 +265,10 @@ export default function AdminPanel() {
     setProgress(0);
 
     try {
-      const formData = new FormData();
-      formData.append("jewelryImage", imageFile);
-      formData.append("name", name);
-      formData.append("category", category);
-      formData.append("tags", tags);
-      formData.append("price", price);
-      formData.append("active", active);
-      formData.append("anchorPoint", JSON.stringify(anchor));
-
-      const res = await fetch(`${API_BASE}/api/jewelry`, { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
-
+      await uploadOneItem(name, category);
       setProgress(100);
       setMessage({ text: "✅ Jewelry saved permanently to server/public/jewelry.", type: "success" });
-      // Reset form
-      setName(""); setPrice(""); setTags(""); setActive(true);
-      setImageFile(null); setImagePreview(null); setAnchor({ x: 0.5, y: 0.5 });
+      resetForm();
       fetchList();
     } catch (err) {
       console.error(err);
@@ -257,6 +277,43 @@ export default function AdminPanel() {
       setSubmitting(false);
       setProgress(0);
     }
+  };
+
+  // Toggles a piece row's name-editing input.
+  const updatePieceSelection = (idx, patch) => {
+    setPieceSelections((prev) => prev.map((p, i) => (i === idx ? { ...p, ...patch } : p)));
+  };
+
+  // ── Submit all included pieces from one multi-piece photo — one catalog
+  // entry per piece, same source image, sequentially so progress can be shown
+  // and one failure doesn't lose the others already saved. ────────────────
+  const handleSubmitAllPieces = async () => {
+    const included = pieceSelections.filter((p) => p.included && p.name.trim());
+    if (!imageFile || included.length === 0) return;
+
+    setSubmittingAll(true);
+    setMessage({ text: "", type: "" });
+    setSubmitAllProgress({ done: 0, total: included.length });
+
+    let failures = 0;
+    for (let i = 0; i < included.length; i++) {
+      try {
+        await uploadOneItem(included[i].name.trim(), included[i].category);
+      } catch (err) {
+        console.error(`Failed to save "${included[i].name}":`, err);
+        failures++;
+      }
+      setSubmitAllProgress({ done: i + 1, total: included.length });
+    }
+
+    setMessage(
+      failures === 0
+        ? { text: `✅ Saved all ${included.length} pieces to the catalog.`, type: "success" }
+        : { text: `Saved ${included.length - failures} of ${included.length} pieces — ${failures} failed, see console.`, type: "error" }
+    );
+    resetForm();
+    fetchList();
+    setSubmittingAll(false);
   };
 
   // ── Toggle active ──────────────────────────────────────────
@@ -404,6 +461,75 @@ export default function AdminPanel() {
                             {piece.category.replace("-", " ")}
                           </button>
                         ))}
+                      </div>
+                    )}
+
+                    {/* Multi-piece set: edit each piece's name and submit them
+                        all at once — same source image, one catalog entry per
+                        included piece — instead of re-uploading N times. */}
+                    {!detecting && pieceSelections.length > 1 && (
+                      <div className="space-y-2 p-3 border border-ink-700 bg-ink-950">
+                        <p className="text-[10px] text-ink-400 font-semibold uppercase tracking-wider">
+                          Set names for all {pieceSelections.length} pieces
+                        </p>
+                        {pieceSelections.map((piece, idx) => (
+                          <div key={piece.category} className="flex items-center space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => updatePieceSelection(idx, { included: !piece.included })}
+                              title={piece.included ? "Exclude from batch" : "Include in batch"}
+                              className={`flex-shrink-0 w-5 h-5 flex items-center justify-center border transition-colors ${
+                                piece.included
+                                  ? "bg-accent-500 border-accent-500 text-ink-50"
+                                  : "bg-ink-900 border-ink-700 text-ink-500"
+                              }`}
+                            >
+                              {piece.included && <Check className="w-3 h-3 stroke-[3px]" />}
+                            </button>
+                            <span className="flex-shrink-0 text-[9px] text-ink-400 uppercase tracking-wider w-16 truncate capitalize">
+                              {piece.category.replace("-", " ")}
+                            </span>
+                            <input
+                              type="text"
+                              value={piece.name}
+                              onChange={(e) => updatePieceSelection(idx, { name: e.target.value })}
+                              placeholder="Piece name"
+                              disabled={!piece.included}
+                              className="flex-1 min-w-0 bg-ink-900 border border-ink-700 px-2 py-1.5 text-ink-50 text-[10px] focus:outline-none focus:border-accent-500 disabled:opacity-40 transition-colors"
+                            />
+                          </div>
+                        ))}
+
+                        {submittingAll && (
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-[10px] text-ink-400">
+                              <span>Saving pieces...</span>
+                              <span className="text-accent-500 font-bold">{submitAllProgress.done}/{submitAllProgress.total}</span>
+                            </div>
+                            <div className="w-full h-1 bg-ink-700 overflow-hidden">
+                              <div
+                                className="h-full bg-accent-500 transition-all duration-300"
+                                style={{ width: `${(submitAllProgress.done / Math.max(submitAllProgress.total, 1)) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={handleSubmitAllPieces}
+                          disabled={submittingAll || pieceSelections.every((p) => !p.included || !p.name.trim())}
+                          className={`w-full py-2 text-[10px] font-bold tracking-wide transition-colors flex items-center justify-center space-x-2 border ${
+                            submittingAll || pieceSelections.every((p) => !p.included || !p.name.trim())
+                              ? "bg-ink-900 text-ink-500 cursor-not-allowed border-ink-700"
+                              : "bg-accent-500 border-accent-500 text-ink-50 hover:bg-accent-600 cursor-pointer"
+                          }`}
+                        >
+                          {submittingAll
+                            ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Saving...</span></>
+                            : <><Plus className="w-3.5 h-3.5" /><span>Submit All {pieceSelections.filter((p) => p.included).length} Pieces</span></>
+                          }
+                        </button>
                       </div>
                     )}
                     <div className="border border-ink-700 bg-ink-950 overflow-hidden flex items-center justify-center p-3">

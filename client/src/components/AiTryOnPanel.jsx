@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Sparkles, Download, RefreshCw, AlertTriangle } from "lucide-react";
 import { useAiTryOnViewModel } from "../viewmodels/useAiTryOnViewModel";
 import { useDownloadGateViewModel } from "../viewmodels/useDownloadGateViewModel";
@@ -14,7 +14,7 @@ import LeadCaptureModal from "./LeadCaptureModal";
 // Generation is explicit (Generate button) rather than auto-firing on every
 // selection change — the user picks as many pieces (one per category) as
 // they want stacked together first, then submits once.
-export default function AiTryOnPanel({ userPhotos, jewelryItems = [] }) {
+export default function AiTryOnPanel({ userPhotos, jewelryItems = [], onGenerated }) {
   const { state, generate, reset } = useAiTryOnViewModel();
   const downloadGate = useDownloadGateViewModel();
   const { isGenerating, result, error } = state;
@@ -25,6 +25,14 @@ export default function AiTryOnPanel({ userPhotos, jewelryItems = [] }) {
   const handleGenerate = () => {
     generate({ userPhotos, jewelryItems });
   };
+
+  // Lets the parent know a generation just completed, so it can treat the
+  // NEXT jewelry selection as a fresh start instead of stacking onto pieces
+  // from this already-generated result.
+  useEffect(() => {
+    if (result?.imageUrl) onGenerated?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result?.imageUrl]);
 
   const handleDownload = () => {
     downloadGate.requestDownload(() => {
